@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import *
 from PIL import ImageTk, Image
 from pytube import YouTube
 from bs4 import BeautifulSoup
@@ -7,16 +8,38 @@ import requests
 import re
 import os
 
+root = tk.Tk()
+root.title("dTube")
+
+videoList = []
+var = IntVar()
+
+def selection(value):
+    if(value == 1):
+        urlInput_label = tk.Label(frame,text="----------Video Details----------",bg="#041824",fg="#ffffff",font=("Courier", 10))
+        urlInput_label.place(y=200,relwidth=1,relheight=0.07)
+    elif(value == 2):
+        urlInput_label = tk.Label(frame,text="----------PlayList Details----------",bg="#041824",fg="#ffffff",font=("Courier", 10))
+        urlInput_label.place(y=200,relwidth=1,relheight=0.07)
+    
+
+def downloadOne(url):
+    downloadYouTube(url)
+
+def downloadList():
+    for link in videoList:
+        downloadYouTube(link)
+
 def getPlaylistLinks(url):
     html_page = urlopen(url)
     soup = BeautifulSoup(html_page , 'html.parser')
-    pl_videos = set()
     for a in soup.find_all('a'):
             if a.get('href').startswith('/watch'):
-                pl_videos.add('https://youtube.com' + a.get('href').split('&')[0])
-    print(pl_videos)
+                videoList.append('https://youtube.com' + a.get('href').split('&')[0])
+    print(videoList)
+    print(var)
 
-def downloadYouTube(videourl, path):
+def downloadYouTube(videourl,path):
     yt = YouTube(videourl)
     yt = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').desc().first()
     if not os.path.exists(path):
@@ -27,9 +50,6 @@ def enter():
     getPlaylistLinks(str(urlInput.get()))
     #downloadYouTube(str(urlInput.get()), "C:/Users/HASANTHA MALSHAN/Desktop")
 
-
-root = tk.Tk()
-root.title("dTube")
 
 canvas = tk.Canvas(root, height=760, width=510,bg="#041824")
 root.maxsize(500, 750)
@@ -48,11 +68,20 @@ frame.place(relx=0.5,rely=0.25,relwidth=0.75,relheight=0.73,anchor='n')
 urlInput_label = tk.Label(frame,text="Paste your URL here...",bg="#041824",fg="#ffffff",font=("Courier", 15))
 urlInput_label.place(relwidth=1,relheight=0.07)
 
+PlaylistRadio = tk.Radiobutton(frame,bg="#0c98f0",variable=var, value=2,text="Playlist",font=("Courier", 10),fg="#041824",borderwidth=0,command=lambda : selection(var.get()))
+PlaylistRadio.place(x=210,y=57)
+
+SingleRadio = tk.Radiobutton(frame,bg="#0c98f0", variable=var, value=1,text="Single video",font=("Courier", 10),fg="#041824",borderwidth=0,command=lambda : selection(var.get()))
+SingleRadio.place(x=70,y=57)
+
 urlInput = tk.Entry(frame,font=40)
-urlInput.place(y=50,relwidth=1,relheight=0.06)
+urlInput.place(y=100,relwidth=1,relheight=0.06)
 
 urlInput_button = tk.Button(frame, text="Enter",bd=0,padx=20,pady=10, bg='#052978',fg="#ffffff",command=enter)
-urlInput_button.place(x=150,y=90)
+urlInput_button.place(x=150,y=155)
+
+urlInput_button = tk.Button(frame, text="Download",bd=0,padx=20,pady=10, bg='#052978',fg="#ffffff")
+urlInput_button.place(x=136,y=500)
 
 
 root.mainloop()
