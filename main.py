@@ -13,6 +13,8 @@ import os
 root = tk.Tk()
 root.title("dTube")
 
+root.iconbitmap("dtubefav.ico")
+
 videoList = []
 
 var = IntVar()
@@ -24,7 +26,7 @@ def getpath():
     path1 = filedialog.askdirectory()
     path.set(path1)
     urlInput_label = tk.Label(frame,text="Path > " + path.get(),bg="#041824",fg="#ffffff",font=("Courier", 10),wraplength=400)
-    urlInput_label.place(y=440,relwidth=1,relheight=0.05)
+    urlInput_label.place(y=450,relwidth=1,relheight=0.05)
 
 def selection(value):
     videotype.set(value)
@@ -62,7 +64,7 @@ def enter():
         urlInput_label = tk.Label(frame,text=yt1.title,bg="#041824",fg="#ffffff",font=("Courier", 10),wraplength=400)
         urlInput_label.place(y=240,relwidth=1,relheight=0.2)
         urlInput_label = tk.Label(frame,text=yt1.length + " seconds long",bg="#041824",fg="#ffffff",font=("Courier", 10),wraplength=400)
-        urlInput_label.place(y=330,relwidth=1,relheight=0.05)
+        urlInput_label.place(y=330,relwidth=1,relheight=0.05)  
 
     elif(videotype.get() == 2):
         pl = Playlist(urlInput.get())
@@ -75,14 +77,18 @@ def enter():
 def download():
     if(videotype.get() == 1):
         downloadYouTube(str(urlInput.get()),path.get())
+        urlInput_label = tk.Label(frame,text=YouTube(urlInput.get()).title + " downloaded !",bg="#041824",fg="#ffffff",font=("Courier", 10),wraplength=400)
+        urlInput_label.place(y=370,relwidth=1,relheight=0.2)
     elif(videotype.get() == 2):
         pl = Playlist(urlInput.get())
         pl.populate_video_urls()
         for link in pl.parse_links():
              videolink= 'https://www.youtube.com' + link
              downloadYouTube(videolink,path.get())
+             urlInput_label = tk.Label(frame,text=YouTube(videolink).title + " downloaded !",bg="#041824",fg="#ffffff",font=("Courier", 10),wraplength=400)
+             urlInput_label.place(y=370,relwidth=1,relheight=0.2)
             
-                
+         
 
 canvas = tk.Canvas(root, height=760, width=510,bg="#041824")
 root.maxsize(500, 750)
