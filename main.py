@@ -3,7 +3,7 @@ from tkinter import *
 from tkinter import filedialog
 from tkinter.ttk import Progressbar
 from PIL import ImageTk, Image
-from pytube import YouTube
+from pytube import YouTube,Stream,Playlist
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
 import requests
@@ -35,15 +35,18 @@ def selection(value):
         urlInput_label = tk.Label(frame,text="--------PlayList Details--------",bg="#041824",fg="#ffffff",font=("Courier", 10))
         urlInput_label.place(y=200,relwidth=1,relheight=0.07)
 
-def getPlaylistLinks(url):
-    html_page = urlopen(url)
-    soup = BeautifulSoup(html_page , 'html.parser')
-    for a in soup.find_all('a'):
-            if a.get('href').startswith('/watch'):
-                videoList.append('https://youtube.com' + a.get('href').split('&')[0])
+# def getPlaylistLinks(url):
+#     pl = Playlist(url)
+#     pl.populate_video_urls()
+#     print('Number of videos in playlist: %s' % len(pl.video_urls))
+    # html_page = urlopen(url)
+    # soup = BeautifulSoup(html_page , 'html.parser')
+    # for a in soup.find_all('a', id='thumbnail'):
+    #         if a.get('href').startswith('/watch'):
+    #             videoList.append('https://youtube.com' + a.get('href').split('&')[0])
     #print(videoList)
 
-def downloadYouTube(videourl,downloadpath,name):
+def downloadYouTube(videourl,downloadpath):
     # progress = Progressbar(frame,orient="horizontal",length=100,mode='determinate')
     # progress.place(y=450,relwidth=1,relheight=0.01)
     yt = YouTube(videourl)
@@ -54,26 +57,31 @@ def downloadYouTube(videourl,downloadpath,name):
    
 
 def enter():
-    print(videoList)
     if(videotype.get() == 1):
         yt1 =  YouTube(urlInput.get())
         urlInput_label = tk.Label(frame,text=yt1.title,bg="#041824",fg="#ffffff",font=("Courier", 10),wraplength=400)
-        urlInput_label.place(y=260,relwidth=1,relheight=0.2)
+        urlInput_label.place(y=240,relwidth=1,relheight=0.2)
+        urlInput_label = tk.Label(frame,text=yt1.length + " seconds long",bg="#041824",fg="#ffffff",font=("Courier", 10),wraplength=400)
+        urlInput_label.place(y=330,relwidth=1,relheight=0.05)
+
     elif(videotype.get() == 2):
-        getPlaylistLinks(urlInput.get())
-        urlInput_label = tk.Label(frame,text=len(videoList),bg="#041824",fg="#ffffff",font=("Courier", 10),wraplength=400)
+        pl = Playlist(urlInput.get())
+        pl.populate_video_urls()
+        urlInput_label = tk.Label(frame,text='Playlist Name: '+ pl.title()+'\n'+
+                                             'Number of videos in playlist: ' +str(len(pl.video_urls))
+                                              ,bg="#041824",fg="#ffffff",font=("Courier", 10),wraplength=400)
         urlInput_label.place(y=260,relwidth=1,relheight=0.2)
 
 def download():
-    yt1 =  YouTube(urlInput.get())
     if(videotype.get() == 1):
-        downloadYouTube(str(urlInput.get()),path.get(),yt1.title)
+        downloadYouTube(str(urlInput.get()),path.get())
     elif(videotype.get() == 2):
-        for l in videoList:
-            yt1 =  YouTube(l)
-            get_true = True
-            while get_true:
-                downloadYouTube(l,path.get(),yt1.title)
+        pl = Playlist(urlInput.get())
+        pl.populate_video_urls()
+        for link in pl.parse_links():
+             videolink= 'https://www.youtube.com' + link
+             downloadYouTube(videolink,path.get())
+            
                 
 
 canvas = tk.Canvas(root, height=760, width=510,bg="#041824")
